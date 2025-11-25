@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <title>Losowanie Mikołajkowe 🎅🎁</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
 body {
     font-family: 'Montserrat', sans-serif;
@@ -18,8 +15,6 @@ body {
     background-size: cover;
     color: #fff;
 }
-
-/* Ciemna półprzezroczysta warstwa dla lepszej czytelności */
 .overlay {
     background: rgba(0,0,0,0.55);
     padding: 20px;
@@ -29,7 +24,6 @@ body {
     margin-top: 40px;
     box-shadow: 0 0 20px rgba(0,0,0,0.8);
 }
-
 h1 {
     text-align: center;
     font-size: 36px;
@@ -37,16 +31,14 @@ h1 {
     color: #ffdb76;
     text-shadow: 0 0 10px #000;
 }
-
 .subtitle {
     text-align: center;
     font-size: 18px;
     margin-bottom: 25px;
     color: #f2e9d0;
 }
-
 .result {
-    margin-top: 30px;
+    margin-top: 20px;
     padding: 25px;
     background: #ffffffee;
     border-radius: 15px;
@@ -56,8 +48,23 @@ h1 {
     color: #b80000;
     box-shadow: 0 0 15px rgba(255,255,255,0.5);
 }
-
-/* Animowany śnieg */
+button#drawBtn {
+    display: block;
+    margin: 0 auto;
+    padding: 15px 25px;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 10px;
+    border: none;
+    background: #ff4d4d;
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 5px #b30000;
+}
+button#drawBtn:active {
+    transform: translateY(2px);
+    box-shadow: 0 3px #b30000;
+}
 .snowflake {
     position: fixed;
     top: -10px;
@@ -67,27 +74,25 @@ h1 {
     animation-name: fall;
     animation-timing-function: linear;
 }
-
 @keyframes fall {
     0% { transform: translateY(0); opacity: 1; }
     100% { transform: translateY(110vh); opacity: 0; }
 }
-
 </style>
 </head>
 <body>
 
 <div class="overlay">
     <h1>🎄 Losowanie Mikołajkowe 🎁</h1>
-    <div class="subtitle">Twój tajny prezentodawca już czeka…</div>
-    <div id="output" class="result">Ładowanie…</div>
+    <div class="subtitle">Kliknij przycisk, aby poznać swojego prezentodawcę!</div>
+    <button id="drawBtn">Losuj 🎅</button>
+    <div id="output" class="result">Wynik pojawi się tutaj po kliknięciu losuj.</div>
 </div>
 
 <script>
 // ----------------------
 // DANE WEJŚCIOWE
 // ----------------------
-
 const fixedResults = {
     "Bożena": "Basia",
     "Jarek": "Danusia",
@@ -103,7 +108,7 @@ const participants = [
 ];
 
 const exclusions = {
-    "Konrad": ["Bożena","Jarek","Martyna"],
+    "Konrad": ["Bożena","Jarek","Martyny"],
     "Piotrek": ["Agnieszka","Kuba","Maciek"],
     "Agnieszka": ["Piotrek","Kuba","Maciek"],
     "Kuba": ["Piotrek","Agnieszka","Maciek"],
@@ -113,14 +118,8 @@ const exclusions = {
 };
 
 // ----------------------
-// FUNKCJE LOGICZNE
+// FUNKCJE
 // ----------------------
-
-function getParam(name) {
-    const url = new URL(window.location.href);
-    return url.searchParams.get(name);
-}
-
 function randomChoice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -128,41 +127,42 @@ function randomChoice(arr) {
 // ----------------------
 // GŁÓWNA LOGIKA
 // ----------------------
-
-const person = getParam("osoba");
+const drawBtn = document.getElementById("drawBtn");
 const output = document.getElementById("output");
+const person = new URL(window.location.href).searchParams.get("osoba");
 
-if (!person || !participants.includes(person)) {
-    output.innerHTML = "Niepoprawny link. Upewnij się, że używasz właściwego odnośnika.";
-} else {
-
-    if (fixedResults[person]) {
-        output.innerHTML = `Wylosowałeś/aś: <span style="color:#008000;">${fixedResults[person]}</span> 🎁`;
+drawBtn.addEventListener("click", () => {
+    if(!person || !participants.includes(person)) {
+        output.innerHTML = "Niepoprawny link. Upewnij się, że używasz właściwego odnośnika.";
+        return;
     }
 
-    else {
-        const saved = localStorage.getItem("mikolaj_" + person);
-
-        if (saved) {
-            output.innerHTML = `Wylosowałeś/aś: <span style="color:#008000;">${saved}</span> 🎁`;
-        } else {
-
-            let available = participants.filter(p =>
-                p !== person &&
-                !exclusions[person]?.includes(p) &&
-                !Object.values(fixedResults).includes(p)
-            );
-
-            if (available.length === 0) {
-                output.innerHTML = "Brak możliwych osób do wylosowania (wykluczenia).";
-            } else {
-                const result = randomChoice(available);
-                localStorage.setItem("mikolaj_" + person, result);
-                output.innerHTML = `Wylosowałeś/aś: <span style="color:#008000;">${result}</span> 🎁`;
-            }
-        }
+    if(fixedResults[person]) {
+        output.innerHTML = `Wylosowałeś/aś: <b>${fixedResults[person]}</b> 🎁`;
+        return;
     }
-}
+
+    const saved = localStorage.getItem("mikolaj_" + person);
+    if(saved){
+        output.innerHTML = `Wylosowałeś/aś: <b>${saved}</b> 🎁`;
+        return;
+    }
+
+    let available = participants.filter(p =>
+        p !== person &&
+        !exclusions[person]?.includes(p) &&
+        !Object.values(fixedResults).includes(p)
+    );
+
+    if(available.length === 0){
+        output.innerHTML = "Brak możliwych osób do wylosowania (wykluczenia).";
+        return;
+    }
+
+    const result = randomChoice(available);
+    localStorage.setItem("mikolaj_" + person, result);
+    output.innerHTML = `Wylosowałeś/aś: <b>${result}</b> 🎁`;
+});
 
 // ----------------------
 // GENERATOR ŚNIEGU
@@ -171,17 +171,12 @@ function createSnowflake() {
     const snow = document.createElement("div");
     snow.classList.add("snowflake");
     snow.textContent = "❄";
-
     snow.style.left = Math.random() * 100 + "vw";
     snow.style.animationDuration = 5 + Math.random() * 5 + "s";
-
     document.body.appendChild(snow);
-
     setTimeout(() => snow.remove(), 12000);
 }
-
 setInterval(createSnowflake, 200);
-
 </script>
 
 </body>
