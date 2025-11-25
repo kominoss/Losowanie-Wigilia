@@ -108,7 +108,7 @@ const participants = [
 ];
 
 const exclusions = {
-    "Konrad": ["Bożena","Jarek","Martyny"],
+    "Konrad": ["Bożena","Jarek","Martyna"],
     "Piotrek": ["Agnieszka","Kuba","Maciek"],
     "Agnieszka": ["Piotrek","Kuba","Maciek"],
     "Kuba": ["Piotrek","Agnieszka","Maciek"],
@@ -137,21 +137,28 @@ drawBtn.addEventListener("click", () => {
         return;
     }
 
+    // Pobranie globalnej listy wszystkich wylosowanych
+    let allResults = JSON.parse(localStorage.getItem("mikolaj_all") || "{}");
+
     if(fixedResults[person]) {
         output.innerHTML = `Wylosowałeś/aś: <b>${fixedResults[person]}</b> 🎁`;
+        allResults[person] = fixedResults[person];
+        localStorage.setItem("mikolaj_all", JSON.stringify(allResults));
         return;
     }
 
-    const saved = localStorage.getItem("mikolaj_" + person);
-    if(saved){
-        output.innerHTML = `Wylosowałeś/aś: <b>${saved}</b> 🎁`;
+    if(allResults[person]){
+        output.innerHTML = `Wylosowałeś/aś: <b>${allResults[person]}</b> 🎁`;
         return;
     }
 
+    // Losowanie dynamiczne bez powtarzania
+    let taken = Object.values(allResults);
     let available = participants.filter(p =>
         p !== person &&
         !exclusions[person]?.includes(p) &&
-        !Object.values(fixedResults).includes(p)
+        !Object.values(fixedResults).includes(p) &&
+        !taken.includes(p)
     );
 
     if(available.length === 0){
@@ -160,7 +167,8 @@ drawBtn.addEventListener("click", () => {
     }
 
     const result = randomChoice(available);
-    localStorage.setItem("mikolaj_" + person, result);
+    allResults[person] = result;
+    localStorage.setItem("mikolaj_all", JSON.stringify(allResults));
     output.innerHTML = `Wylosowałeś/aś: <b>${result}</b> 🎁`;
 });
 
