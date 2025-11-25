@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tajny Mikołaj — losowanie (bez maili)</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;max-width:900px;margin:20px auto;padding:0 16px;color:#111}
+  h1{font-size:22px;margin-bottom:8px}
+  label{display:block;margin-top:12px;font-weight:600}
+  input[type=text], textarea, select{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-top:6px;box-sizing:border-box}
+  .row{display:flex;gap:8px;align-items:center}
+  .col{flex:1}
+  button{margin-top:10px;padding:8px 12px;border-radius:8px;border:0;background:#0a66ff;color:white;cursor:pointer}
+  button.secondary{background:#666}
+  .participants{margin-top:12px}
+  .participant{display:flex;align-items:center;gap:8px;padding:6px;border:1px solid #eee;border-radius:8px;margin-bottom:6px}
+  .small{font-size:13px;color:#444}
+  .exclusions{margin-top:10px}
+  .exclusion-item{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+  .links{margin-top:12px}
+  .link-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .notice{background:#fff9e6;border:1px solid #ffd890;padding:8px;border-radius:8px;margin-top:12px}
+  footer{margin-top:22px;color:#666;font-size:13px}
+  .danger{background:#ffecec;border:1px solid #ffaeae;padding:8px;border-radius:8px;margin-top:12px}
+  code{background:#f3f3f3;padding:2px 6px;border-radius:4px}
+</style>
+</head>
+<body>
+  <h1>Tajny Mikołaj — generator linków (PL)</h1>
+  <p class="small">Dodaj uczestników, ustaw wykluczenia (np. osoby z tego samego domu) i wygeneruj indywidualne linki, które wyślesz SMS-em. Nie wymaga maili ani logowania.</p>
+
+  <label>Lista uczestników (po jednym w wierszu)</label>
+  <textarea id="participantsInput" rows="6" placeholder="Jan Kowalski&#10;Ola Nowak&#10;Kasia"></textarea>
+
+  <div class="row">
+    <div class="col">
+      <label>Dodaj wykluczenie (kto nie może kogo wylosować)</label>
+      <div style="display:flex;gap:6px">
+        <select id="exLeft"></select>
+        <select id="exRight"></select>
+        <button id="addExBtn" class="secondary" style="min-width:120px">Dodaj wykluczenie</button>
+      </div>
+      <div id="exList" class="exclusions small"></div>
+    </div>
+  </div>
+
+  <button id="createBtn">Utwórz losowanie i wygeneruj linki</button>
+  <button id="clearBtn" class="secondary">Wyczyść formularz</button>
+
+  <div id="result" style="display:none">
+    <h2>Wynik losowania — linki do wysłania SMS</h2>
+    <div class="notice">
+      <strong>WAŻNE:</strong> Każdy link jest indywidualny — wyślij go tylko do przypisanej osoby. Kto otrzyma link innej osoby, będzie mógł zobaczyć jej wynik.
+    </div>
+    <div id="linksContainer" class="links"></div>
+
+    <div class="danger">
+      <strong>Uwaga:</strong> To narzędzie działa lokalnie i używa kodowania Base64 – to nie jest szyfrowanie. Nie udostępniaj listy linków publicznie.
+    </div>
+  </div>
+
+  <div id="revealView" style="display:none">
+    <h2>Odkryj kogo wylosowałeś</h2>
+    <div id="revealName" class="small"></div>
+    <div style="margin-top:12px">
+      <button id="showReceiverBtn">Pokaż kogo wylosowałem</button>
+      <div id="receiverBox" style="margin-top:12px;font-weight:700;font-size:18px"></div>
+    </div>
+  </div>
+
+  <footer>Plik działa lokalnie. Możesz go wrzucić na dowolny hosting statyczny (np. GitHub Pages) albo wysłać plik innym.</footer>
+
+<script>
+/* Helpery base64 z obsługą Unicode */
+function utoa(str){ return btoa(unescape(encodeURIComponent(str))); }
+function atou(b64){ return decodeURIComponent(escape(atob(b64))); }
+
+/* UI refs */
+const participantsInput = document.getElementById('participantsInput');
+const exLeft = document.getElementById('exLeft');
+const exRight = document.getElementById('exRight');
+const addExBtn = document.getElementById('addExBtn');
+const exList = document.getElementById('exList');
+const createBtn = document.getElementById('createBtn');
+const clearBtn = document.getElementById('clearBtn');
+const result = document.getElementById('result');
+const linksContainer = document.getElementById('linksContainer');
+const revealView = document.getElementById('revealView');
+const revealName = document.getElementById('revealName');
+const showReceiverBtn = document.getElementById('showReceiverBtn');
+const receiverBox = document.getElementById('receiverBox');
+
+/* State */
+let participants = [];
+let exclusions = []; // list of pairs {a, b} meaning a cannot draw b
+
+function refreshSelects(){
+  [exLeft, exRight].forEach(sel=>{
+    sel.innerHTML = '<option value="">- wybierz -</option>';
+    participants.forEach((p,i)=> {
+      const opt = document.createElement('option');
+      opt.value = i; opt.textContent = p;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function renderExclusions(){
+  exList.innerHTML = '';
+  if(exclusions.length===0){ exList.textContent = 'Brak wykluczeń.'; return; }
+  exclusions.forEach((ex,i)=>{
+    const div = document.createElement('div');
+    div.className='exclusion-item';
+    div.innerHTML = `<span>${participants[ex.a]} ≠ ${participants[ex.b]}</span>`;
+    const btn = document.createElement('button'); btn.textContent='Usuń'; btn.className='secondary';
+    btn.onclick = ()=>{ exclusions.splice(i,1); renderExclusions(); };
+    div.appendChild(btn);
+    exList.appendChild(div);
+  });
+}
+
+addExBtn.addEventListener('click', ()=>{
+  if(exLeft.value==="" || exRight.value===""){ alert('Wybierz obie osoby do wykluczenia.'); return; }
+  if(exLeft.value === exRight.value){ alert('Nie można wykluczyć tej samej osoby.'); return; }
+  const pair = {a: parseInt(exLeft.value), b: parseInt(exRight.value)};
+  // avoid duplicates
+  if(exclusions.some(e=>e.a===pair.a && e.b===pair.b)){ alert('To wykluczenie już istnieje.'); return; }
+  exclusions.push(pair); renderExclusions();
+});
+
+/* create list from textarea */
+function parseParticipants(){
+  participants = participantsInput.value.split('\n').map(s=>s.trim()).filter(s=>s.length>0);
+  return participants;
+}
+
+/* Secret Santa algorithm: returns mapping index -> receiverIndex or throws */
+function generateMapping(n, exclusionsPairs){
+  // exclusionsPairs: array of {a,b} meaning a cannot get b
+  if(n===0) throw "Brak uczestników";
+  let tries = 0;
+  const maxTries = 20000;
+  const banned = {};
+  exclusionsPairs.forEach(e=>{
+    banned[e.a] = banned[e.a] || new Set();
+    banned[e.a].add(e.b);
+  });
+  while(tries < maxTries){
+    tries++;
+    // create candidate receivers array
+    const receivers = Array.from({length:n}, (_,i)=>i);
+    // shuffle
+    for(let i=n-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [receivers[i],receivers[j]] = [receivers[j],receivers[i]];
+    }
+    // check constraints
+    let ok = true;
+    for(let i=0;i<n;i++){
+      const r = receivers[i];
+      if(r===i){ ok=false; break; } // self
+      if(banned[i] && banned[i].has(r)){ ok=false; break; } // excluded
+    }
+    if(ok) return receivers;
+  }
+  throw "Nie udało się wygenerować losowania z podanymi wykluczeniami (spróbuj usunąć część wykluczeń lub zwiększyć liczbę uczestników).";
+}
+
+/* create event: generate mapping + tokens + per-participant link */
+createBtn.addEventListener('click', ()=>{
+  try{
+    parseParticipants();
+    if(participants.length < 2){ alert('Potrzebujesz co najmniej 2 uczestników.'); return; }
+    // rebuild exclusions indices in case participants changed
+    // (assume exclusions were set before participants change — simple approach)
+    // Validate exclusions indices
+    exclusions = exclusions.filter(e => e.a < participants.length && e.b < participants.length);
+    refreshSelects();
+    renderExclusions();
+
+    // generate mapping
+    const mapping = generateMapping(participants.length, exclusions);
+    // create random event id
+    const eventId = Math.random().toString(36).slice(2,10);
+    // create payload: participants + mapping + eventId
+    const basePayload = {participants, mapping, eventId, createdAt: Date.now()};
+
+    linksContainer.innerHTML = '';
+    // For each participant create tokenized payload visible only to that participant
+    participants.forEach((p,i)=>{
+      // create token that includes only (yourIndex, receiverIndex, participants, eventId)
+      const payload = {
+        eventId: basePayload.eventId,
+        me: i,
+        receiverIndex: mapping[i],
+        participants: participants,
+        createdAt: basePayload.createdAt
+      };
+      const s = utoa(JSON.stringify(payload));
+      const link = location.origin + location.pathname + '#payload=' + encodeURIComponent(s);
+      // create DOM row
+      const row = document.createElement('div'); row.className='link-row';
+      const label = document.createElement('div'); label.style.flex='1'; label.innerHTML = `<strong>${p}</strong><div class="small">Wyślij ten link SMS-em do ${p}</div>`;
+      const inp = document.createElement('input'); inp.type='text'; inp.value=link; inp.style.flex='2';
+      const copyBtn = document.createElement('button'); copyBtn.textContent='Kopiuj link'; copyBtn.onclick = async ()=>{
+        try{
+          await navigator.clipboard.writeText(inp.value);
+          copyBtn.textContent='Skopiowano!';
+          setTimeout(()=>copyBtn.textContent='Kopiuj link',1200);
+        }catch(e){
+          alert('Twoja przeglądarka nie pozwala na kopiowanie. Skopiuj ręcznie.');
+        }
+      };
+      row.appendChild(label); row.appendChild(inp); row.appendChild(copyBtn);
+      linksContainer.appendChild(row);
+    });
+
+    result.style.display='block';
+    // hide creation UI maybe? keep it visible in case organizer wants to recreate
+    // scroll to result
+    result.scrollIntoView({behavior:'smooth'});
+  }catch(err){
+    alert('Błąd: ' + err);
+  }
+});
+
+/* clear */
+clearBtn.addEventListener('click', ()=>{
+  if(!confirm('Wyczyścić formularz?')) return;
+  participantsInput.value='';
+  participants=[];
+  exclusions=[];
+  refreshSelects();
+  renderExclusions();
+  result.style.display='none';
+});
+
+/* If page opened with payload in hash -> show reveal view */
+function tryRevealFromHash(){
+  const hash = location.hash || '';
+  if(!hash.includes('payload=')) return;
+  try{
+    const params = new URLSearchParams(hash.slice(1));
+    const s = params.get('payload');
+    if(!s) return;
+    const json = JSON.parse(atou(decodeURIComponent(s)));
+    // json has eventId, me, receiverIndex, participants, createdAt
+    revealView.style.display='block';
+    document.getElementById('result').style.display='none';
+    revealName.innerHTML = `Jesteś: <strong>${json.participants[json.me]}</strong>`;
+    showReceiverBtn.onclick = ()=>{
+      receiverBox.textContent = json.participants[json.receiverIndex];
+      // remove button after reveal to avoid accidental re-reveal?
+      showReceiverBtn.disabled=true;
+      showReceiverBtn.textContent='Odkryte';
+    };
+    // scroll to reveal
+    revealView.scrollIntoView({behavior:'smooth'});
+  }catch(e){
+    console.error('Błąd odczytu payload:', e);
+  }
+}
+
+/* Update selects whenever participants textarea changes */
+participantsInput.addEventListener('input', ()=>{
+  parseParticipants();
+  refreshSelects();
+  renderExclusions();
+});
+
+/* init */
+parseParticipants();
+refreshSelects();
+renderExclusions();
+tryRevealFromHash();
+
+</script>
+</body>
+</html>
