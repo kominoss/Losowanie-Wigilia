@@ -1,190 +1,94 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Losowanie Mikołajkowe 🎅🎁</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<title>Losowanie 🎅</title>
 <style>
-body {
-    font-family: 'Montserrat', sans-serif;
-    margin: 0;
-    padding: 20px;
-    min-height: 100vh;
-    background: url('https://i.imgur.com/HMZ5KXK.jpg') no-repeat center center fixed;
-    background-size: cover;
-    color: #fff;
-}
-.overlay {
-    background: rgba(0,0,0,0.55);
-    padding: 20px;
-    border-radius: 15px;
-    max-width: 700px;
-    margin: 0 auto;
-    margin-top: 40px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.8);
-}
-h1 {
-    text-align: center;
-    font-size: 36px;
-    margin-bottom: 10px;
-    color: #ffdb76;
-    text-shadow: 0 0 10px #000;
-}
-.subtitle {
-    text-align: center;
-    font-size: 18px;
-    margin-bottom: 25px;
-    color: #f2e9d0;
-}
-.result {
-    margin-top: 20px;
-    padding: 25px;
-    background: #ffffffee;
-    border-radius: 15px;
-    text-align: center;
-    font-size: 26px;
-    font-weight: bold;
-    color: #b80000;
-    box-shadow: 0 0 15px rgba(255,255,255,0.5);
-}
-button#drawBtn {
-    display: block;
-    margin: 0 auto;
-    padding: 15px 25px;
-    font-size: 20px;
-    cursor: pointer;
-    border-radius: 10px;
-    border: none;
-    background: #ff4d4d;
-    color: #fff;
-    font-weight: bold;
-    box-shadow: 0 5px #b30000;
-}
-button#drawBtn:active {
-    transform: translateY(2px);
-    box-shadow: 0 3px #b30000;
-}
-.snowflake {
-    position: fixed;
-    top: -10px;
-    color: white;
-    font-size: 20px;
-    pointer-events: none;
-    animation-name: fall;
-    animation-timing-function: linear;
-}
-@keyframes fall {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(110vh); opacity: 0; }
-}
+    body {
+        font-family: Arial, sans-serif;
+        background: url('https://i.imgur.com/4QF4Q7y.jpeg');
+        background-size: cover;
+        background-position: center;
+        text-align: center;
+        padding-top: 80px;
+        color: white;
+        text-shadow: 2px 2px 4px #000;
+    }
+    .box {
+        background: rgba(0,0,0,0.6);
+        padding: 25px;
+        width: 350px;
+        margin: auto;
+        border-radius: 12px;
+        backdrop-filter: blur(4px);
+    }
+    button {
+        padding: 12px 25px;
+        font-size: 18px;
+        border: none;
+        background: #d62828;
+        color: white;
+        cursor: pointer;
+        border-radius: 8px;
+        margin-top: 15px;
+    }
+    button:hover {
+        background: #b71c1c;
+    }
+    #wynik {
+        margin-top: 20px;
+        font-size: 26px;
+        font-weight: bold;
+        display: none;
+    }
 </style>
 </head>
 <body>
 
-<div class="overlay">
-    <h1>🎄 Losowanie Mikołajkowe 🎁</h1>
-    <div class="subtitle">Kliknij przycisk, aby poznać swojego prezentodawcę!</div>
-    <button id="drawBtn">Losuj 🎅</button>
-    <div id="output" class="result">Wynik pojawi się tutaj po kliknięciu losuj.</div>
+<div class="box">
+    <h1>Świąteczne Losowanie 🎄</h1>
+    <h3 id="kto"></h3>
+    <button id="losuj">LOSUJ</button>
+    <div id="wynik"></div>
 </div>
 
 <script>
-// ----------------------
-// DANE WEJŚCIOWE
-// ----------------------
-const fixedResults = {
+// GOTOWE WYNIKI — 100% poprawne
+const results = {
     "Bożena": "Basia",
     "Jarek": "Danusia",
     "Martyna": "Lena",
     "Basia": "Jarek",
     "Jurek": "Agnieszka",
-    "Lena": "Piotrek"
+    "Lena": "Piotrek",
+    "Konrad": "Maciek",
+    "Piotrek": "Bożena",
+    "Agnieszka": "Jurek",
+    "Kuba": "Konrad",
+    "Danusia": "Martyna",
+    "Maciek": "Stasia",
+    "Stasia": "Kuba"
 };
 
-const participants = [
-    "Konrad","Bożena","Jarek","Martyna","Basia","Jurek","Lena",
-    "Piotrek","Agnieszka","Kuba","Maciek","Danusia","Stasia"
-];
+// Pobieranie uczestnika z linku
+const params = new URLSearchParams(window.location.search);
+const osoba = params.get("osoba");
 
-const exclusions = {
-    "Konrad": ["Bożena","Jarek","Martyna"],
-    "Piotrek": ["Agnieszka","Kuba","Maciek"],
-    "Agnieszka": ["Piotrek","Kuba","Maciek"],
-    "Kuba": ["Piotrek","Agnieszka","Maciek"],
-    "Maciek": ["Piotrek","Agnieszka","Kuba"],
-    "Danusia": ["Konrad"],
-    "Stasia": ["Konrad"]
+// Wyświetlanie osobie jej imienia
+document.getElementById("kto").innerText =
+    osoba ? ("Witaj, " + osoba + "! Kliknij aby wylosować.") :
+    "BŁĄD: brak uczestnika w linku.";
+
+// Obsługa przycisku LOSUJ
+document.getElementById("losuj").onclick = function() {
+    if (!osoba || !results[osoba]) {
+        alert("Błędny link lub brak przypisanego wyniku.");
+        return;
+    }
+    document.getElementById("wynik").innerText =
+        "Wylosowałeś: 🎁 " + results[osoba];
+    document.getElementById("wynik").style.display = "block";
 };
-
-// ----------------------
-// FUNKCJE
-// ----------------------
-function randomChoice(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
-
-// ----------------------
-// GŁÓWNA LOGIKA
-// ----------------------
-const drawBtn = document.getElementById("drawBtn");
-const output = document.getElementById("output");
-const person = new URL(window.location.href).searchParams.get("osoba");
-
-drawBtn.addEventListener("click", () => {
-    if(!person || !participants.includes(person)) {
-        output.innerHTML = "Niepoprawny link. Upewnij się, że używasz właściwego odnośnika.";
-        return;
-    }
-
-    // Pobranie globalnej listy wszystkich wylosowanych
-    let allResults = JSON.parse(localStorage.getItem("mikolaj_all") || "{}");
-
-    if(fixedResults[person]) {
-        output.innerHTML = `Wylosowałeś/aś: <b>${fixedResults[person]}</b> 🎁`;
-        allResults[person] = fixedResults[person];
-        localStorage.setItem("mikolaj_all", JSON.stringify(allResults));
-        return;
-    }
-
-    if(allResults[person]){
-        output.innerHTML = `Wylosowałeś/aś: <b>${allResults[person]}</b> 🎁`;
-        return;
-    }
-
-    // Losowanie dynamiczne bez powtarzania
-    let taken = Object.values(allResults);
-    let available = participants.filter(p =>
-        p !== person &&
-        !exclusions[person]?.includes(p) &&
-        !Object.values(fixedResults).includes(p) &&
-        !taken.includes(p)
-    );
-
-    if(available.length === 0){
-        output.innerHTML = "Brak możliwych osób do wylosowania (wykluczenia).";
-        return;
-    }
-
-    const result = randomChoice(available);
-    allResults[person] = result;
-    localStorage.setItem("mikolaj_all", JSON.stringify(allResults));
-    output.innerHTML = `Wylosowałeś/aś: <b>${result}</b> 🎁`;
-});
-
-// ----------------------
-// GENERATOR ŚNIEGU
-// ----------------------
-function createSnowflake() {
-    const snow = document.createElement("div");
-    snow.classList.add("snowflake");
-    snow.textContent = "❄";
-    snow.style.left = Math.random() * 100 + "vw";
-    snow.style.animationDuration = 5 + Math.random() * 5 + "s";
-    document.body.appendChild(snow);
-    setTimeout(() => snow.remove(), 12000);
-}
-setInterval(createSnowflake, 200);
 </script>
 
 </body>
