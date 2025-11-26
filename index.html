@@ -1,193 +1,352 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<title>Świąteczne Losowanie 🎅</title>
-
-<!-- STYLE -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Świąteczne Losowanie — Wigilia 🎁🎄</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
-    body {
-        font-family: 'Trebuchet MS', sans-serif;
-        background: url('https://images.unsplash.com/photo-1608889175123-5e24e64df0c6?auto=format&fit=crop&w=1500&q=80');
-        background-size: cover;
-        background-position: center;
-        text-align: center;
-        padding-top: 60px;
-        color: white;
-        text-shadow: 2px 2px 4px #000;
-        overflow: hidden;
-        animation: fadeInBody 2s ease;
-    }
+  :root{
+    --card-bg: rgba(255,255,255,0.95);
+    --accent: #d62828;
+    --green: #0b8a2f;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color:#111;
+    background: radial-gradient(ellipse at top, rgba(12,30,45,0.9), rgba(2,10,20,0.95)), url('https://images.unsplash.com/photo-1608889175123-5e24e64df0c6?auto=format&fit=crop&w=1600&q=80') center/cover fixed no-repeat;
+    overflow:hidden;
+    padding:28px;
+  }
 
-    @keyframes fadeInBody {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
+  /* container */
+  .wrap{
+    max-width:920px;
+    margin:24px auto;
+    display:grid;
+    grid-template-columns: 1fr 360px;
+    gap:20px;
+    align-items:start;
+  }
 
-    .box {
-        background: rgba(0, 0, 0, 0.65);
-        padding: 30px;
-        width: 380px;
-        margin: auto;
-        border-radius: 14px;
-        backdrop-filter: blur(4px);
-        animation: slideDown 1.7s ease;
-    }
+  /* left panel (main) */
+  .panel{
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    padding:22px;
+    border-radius:14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    color:#fff;
+    min-height:280px;
+  }
 
-    @keyframes slideDown {
-        from { transform: translateY(-40px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
+  h1{margin:0 0 8px 0;font-size:28px;color:var(--accent);text-shadow:0 2px 6px rgba(0,0,0,0.6)}
+  p.lead{margin:0 0 18px 0;color:#ffd;opacity:0.95}
 
-    button {
-        padding: 15px 30px;
-        font-size: 20px;
-        border: none;
-        background: #d62828;
-        color: white;
-        cursor: pointer;
-        border-radius: 10px;
-        margin-top: 20px;
-        font-weight: bold;
-        box-shadow: 0 0 10px #000;
-        animation: pulse 1.6s infinite;
-        transition: 0.3s;
-    }
+  /* card with action */
+  .card{
+    background:var(--card-bg);
+    color:#111;
+    padding:20px;
+    border-radius:12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    text-align:center;
+  }
 
-    button:hover {
-        background: #b71c1c;
-        transform: scale(1.05);
-    }
+  #kto { font-size:18px; margin-bottom:12px; color:#333; }
+  #wynik { font-size:22px; font-weight:700; margin-top:14px; color:var(--green) }
 
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
+  button.primary{
+    background:linear-gradient(180deg,var(--accent),#b71c1c);
+    color:white;border:0;padding:12px 20px;border-radius:10px;font-size:18px;cursor:pointer;
+    box-shadow:0 6px rgba(0,0,0,0.2);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  button.primary:active{transform:translateY(2px);box-shadow:0 3px rgba(0,0,0,0.15)}
+  button.secondary{
+    margin-left:12px;padding:10px 12px;border-radius:8px;border:0;background:#eee;color:#333;cursor:pointer;
+  }
 
-    #wynik {
-        margin-top: 25px;
-        font-size: 30px;
-        font-weight: bold;
-        display: none;
-        animation: fadeInResult 1s ease;
-    }
+  /* right column: info & links */
+  .sidebar{
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .box{
+    background:rgba(255,255,255,0.08);
+    padding:14px;border-radius:12px;color:#fff;
+  }
+  .links input{width:100%;padding:8px;border-radius:8px;border:0}
 
-    @keyframes fadeInResult {
-        from { opacity: 0; transform: scale(0.9); }
-        to { opacity: 1; transform: scale(1); }
-    }
+  /* falling snow + lights */
+  .snowflake { position:fixed; top:-10px; pointer-events:none; font-size:18px; color:white; text-shadow:0 1px 2px rgba(0,0,0,0.6); }
+  .lights { position: absolute; left:0; right:0; top:0; height:70px; pointer-events:none; }
 
-    /* ❄️ śnieg */
-    .snowflake {
-        position: fixed;
-        top: -10px;
-        color: white;
-        user-select: none;
-        pointer-events: none;
-        animation: fall linear infinite;
-    }
+  /* santa */
+  #mikolaj {
+    position:fixed; bottom:12px; left:-220px; width:140px; z-index:9999; transform:translateY(0);
+    filter:drop-shadow(0 8px 10px rgba(0,0,0,0.6));
+    animation: santaRun 16s linear infinite;
+  }
+  @keyframes santaRun{
+    0%{ left:-260px; transform:translateY(0) scaleX(1) }
+    45%{ left:55%; transform:translateY(-6px) scaleX(1) }
+    50%{ transform:scaleX(-1) } /* flip */
+    95%{ left:110%; transform:translateY(0) scaleX(-1) }
+    100%{ left:110%; transform:translateY(0) scaleX(-1) }
+  }
 
-    @keyframes fall {
-        0% { transform: translateY(-10px); }
-        100% { transform: translateY(100vh); }
-    }
+  /* presents animation */
+  .present{
+    display:inline-block;margin:6px;opacity:0;transform:translateY(10px) scale(.9);
+  }
+  .present.show{ animation: pop .6s cubic-bezier(.2,.9,.3,1) forwards; }
+  @keyframes pop{
+    0%{opacity:0; transform:translateY(10px) scale(.8)}
+    60%{opacity:1; transform:translateY(-8px) scale(1.05)}
+    100%{transform:translateY(0) scale(1)}
+  }
 
-    /* 🎅 animowany Mikołaj */
-    #mikolaj {
-        position: fixed;
-        bottom: 20px;
-        left: -200px;
-        width: 140px;
-        animation: runSanta 12s linear infinite;
-        z-index: 999;
-        transform: scaleX(-1);
-    }
+  /* responsive */
+  @media(max-width:880px){
+    .wrap{grid-template-columns:1fr; padding-bottom:180px}
+    #mikolaj{ width:100px; bottom:6px }
+  }
 
-    @keyframes runSanta {
-        0% { left: -200px; }
-        50% { left: 110%; transform: scaleX(-1); }
-        51% { transform: scaleX(1); }
-        100% { left: -200px; transform: scaleX(1); }
-    }
+  /* subtle twinkling lights */
+  .twinkle { position:fixed; z-index:1; pointer-events:none; mix-blend-mode:screen; filter:blur(0.6px); opacity:.9 }
+  .credit{font-size:12px;color:#ddd;opacity:.8;margin-top:8px;text-align:center}
 </style>
 </head>
 <body>
 
-<!-- ❄️ Śnieg -->
-<script>
-for (let i = 0; i < 60; i++) {
-    let flake = document.createElement("div");
-    flake.className = "snowflake";
-    flake.innerHTML = "❄️";
-    flake.style.left = Math.random() * 100 + "vw";
-    flake.style.animationDuration = 4 + Math.random() * 6 + "s";
-    flake.style.opacity = Math.random();
-    flake.style.fontSize = (12 + Math.random() * 22) + "px";
-    document.body.appendChild(flake);
-}
-</script>
+<!-- twinkling lights (decor) -->
+<svg class="twinkle" width="100%" height="120" viewBox="0 0 100 10" preserveAspectRatio="none" style="top:0;left:0">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ffcc66"/><stop offset="1" stop-color="#ff6b6b"/></linearGradient>
+  </defs>
+  <g fill="url(#g1)" opacity="0.7">
+    <!-- string of lights -->
+    <circle cx="5" cy="5" r="0.9" />
+    <circle cx="12" cy="5" r="0.9" />
+    <circle cx="19" cy="5" r="0.9" />
+    <circle cx="26" cy="5" r="0.9" />
+    <circle cx="33" cy="5" r="0.9" />
+    <circle cx="40" cy="5" r="0.9" />
+    <circle cx="47" cy="5" r="0.9" />
+    <circle cx="54" cy="5" r="0.9" />
+    <circle cx="61" cy="5" r="0.9" />
+    <circle cx="68" cy="5" r="0.9" />
+    <circle cx="75" cy="5" r="0.9" />
+    <circle cx="82" cy="5" r="0.9" />
+    <circle cx="89" cy="5" r="0.9" />
+    <circle cx="96" cy="5" r="0.9" />
+  </g>
+</svg>
 
-<!-- 🎅 animowany Mikołaj -->
-<img id="mikolaj"
-     src="https://pngimg.com/uploads/santa_claus/santa_claus_PNG99615.png">
+<!-- Santa (runs across screen) -->
+<img id="mikolaj" src="https://i.imgur.com/3o6i4kR.png" alt="Mikołaj" />
 
-<!-- GŁÓWNE OKNO -->
-<div class="box">
-    <h1>Świąteczne Losowanie 🎄</h1>
-    <h3 id="kto"></h3>
+<div class="wrap">
+  <div class="panel">
+    <h1>Świąteczne Losowanie — Wigilia</h1>
+    <p class="lead">Kliknij „Losuj” — wynik ujawni się z animacją i dźwiękiem. Każdy widzi tylko swój wynik.</p>
 
-    <button id="losuj">LOSUJ 🎁</button>
+    <div class="card" role="region" aria-label="Panel losowania">
+      <div id="kto">Ładowanie…</div>
 
-    <div id="wynik"></div>
+      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+        <button id="drawBtn" class="primary" aria-label="Losuj prezentodawcę">LOSUJ 🎁</button>
+        <button id="musicToggle" class="secondary" title="Włącz / wyłącz muzykę tła">🎵 Muzyka</button>
+      </div>
+
+      <div id="wynik" aria-live="polite"></div>
+
+      <div id="presentRow" style="margin-top:16px"></div>
+
+      <div class="credit">Dźwięk: dzwoneczki • Muzyka tła: opcjonalna (Cicha Noc)</div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="box">
+      <strong>Instrukcja</strong>
+      <ol style="padding-left:16px;margin:8px 0 0 0;text-align:left;color:#fff">
+        <li>Wyślij każdemu link: <code>?osoba=Imię</code> (dokładnie jak w tabeli).</li>
+        <li>Po wejściu kliknij <b>LOSUJ</b> — zobaczysz wynik i animowane prezenty.</li>
+        <li>Możesz włączyć muzykę tła (Cicha Noc) przyciskiem „Muzyka”.</li>
+      </ol>
+    </div>
+
+    <div class="box links">
+      <strong>Gotowe linki</strong>
+      <div style="margin-top:8px;color:#fff;font-size:14px;line-height:1.4">
+        Konrad: <input readonly value="https://kominoss.github.io/Losowanie-Wigilia/?osoba=Konrad" />
+        <br><br>
+        Bożena: <input readonly value="https://kominoss.github.io/Losowanie-Wigilia/?osoba=Bożena" />
+        <br><br>
+        Jarek: <input readonly value="https://kominoss.github.io/Losowanie-Wigilia/?osoba=Jarek" />
+        <br><br>
+        Martyna: <input readonly value="https://kominoss.github.io/Losowanie-Wigilia/?osoba=Martyna" />
+        <br><br>
+        Basia: <input readonly value="https://kominoss.github.io/Losowanie-Wigilia/?osoba=Basia" />
+        <br><br>
+        Jurek: <input readonly value="https://kominoss.github.io/Losowanie-Wigilia/?osoba=Jurek" />
+        <br><br>
+        Lena: <input readonly value="https://kominoss.github.io/Losowanie-Wigilia/?osoba=Lena" />
+      </div>
+    </div>
+  </aside>
 </div>
 
-<!-- 🔔 DZWONECZKI -->
-<audio id="dzwiek" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_f3e5529f65.mp3?filename=christmas-bells-116138.mp3"></audio>
+<!-- AUDIO: bells (on reveal) + background music (Cicha Noc placeholder) -->
+<audio id="bells" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_f3e5529f65.mp3?filename=christmas-bells-116138.mp3"></audio>
 
-<!-- LOGIKA -->
+<!-- Background music: IMPORTANT
+     Replace bgMusic.src with a direct MP3 URL for "Cicha Noc" instrumental if you have one.
+     Example (replace the empty string) -> bgMusic.src = "https://example.com/cichanoc-instrumental.mp3"
+-->
+<audio id="bgMusic" loop preload="none"></audio>
+
 <script>
-// GOTOWE WYNIKI
+/* ============================
+   DANE (wyniki statyczne)
+   ============================ */
 const results = {
-    "Bożena": "Basia",
-    "Jarek": "Danusia",
-    "Martyna": "Lena",
-    "Basia": "Jarek",
-    "Jurek": "Agnieszka",
-    "Lena": "Piotrek",
-    "Konrad": "Maciek",
-    "Piotrek": "Bożena",
-    "Agnieszka": "Jurek",
-    "Kuba": "Konrad",
-    "Danusia": "Martyna",
-    "Maciek": "Stasia",
-    "Stasia": "Kuba"
+  "Bożena":"Basia","Jarek":"Danusia","Martyna":"Lena","Basia":"Jarek","Jurek":"Agnieszka","Lena":"Piotrek",
+  "Konrad":"Maciek","Piotrek":"Bożena","Agnieszka":"Jurek","Kuba":"Stasia","Danusia":"Martyna","Maciek":"Konrad","Stasia":"Kuba"
 };
 
-// pobranie osoby z linku
-const params = new URLSearchParams(window.location.search);
-const osoba = params.get("osoba");
+const participants = Object.keys(results);
 
-document.getElementById("kto").innerText =
-    osoba ? ("Witaj, " + osoba + "! Kliknij aby poznać swojego 🎁.") :
-    "BŁĄD: brak uczestnika w linku.";
+/* ================
+   UI refs
+   ================ */
+const drawBtn = document.getElementById('drawBtn');
+const wynikEl = document.getElementById('wynik');
+const ktoEl = document.getElementById('kto');
+const presentRow = document.getElementById('presentRow');
+const bells = document.getElementById('bells');
+const bgMusic = document.getElementById('bgMusic');
+const musicToggle = document.getElementById('musicToggle');
 
-// po kliknięciu
-document.getElementById("losuj").onclick = function() {
-    if (!osoba || !results[osoba]) {
-        alert("Błędny link lub brak przypisanego wyniku.");
-        return;
+/* ================
+   Background music: place your "Cicha Noc" instrumental URL here
+   (if you don't have it, leave empty — user can toggle and nothing will play)
+   Example: bgMusic.src = "https://twojadomena.pl/cicha-noc-instrumental.mp3";
+   ================= */
+bgMusic.src = ""; // <-- TU WSTAW LINK DO MP3, jeśli masz. Jeśli nie, zostaje puste.
+
+/* ================
+   helper: get participant name from URL param ?osoba=Imie
+   ================ */
+function getParam(name){
+  const p = new URLSearchParams(window.location.search).get(name);
+  return p;
+}
+const person = getParam('osoba');
+
+/* show greeting */
+if(!person){
+  ktoEl.innerText = "BŁĄD: brak uczestnika w linku.";
+  drawBtn.disabled = true;
+} else if (!participants.includes(person)){
+  ktoEl.innerText = `Nieznany uczestnik: ${person}. Sprawdź dokładne imię w linku.`;
+  drawBtn.disabled = true;
+} else {
+  ktoEl.innerText = `Witaj, ${person}! Kliknij LOSUJ, aby poznać swojego prezentodawcę.`;
+}
+
+/* presents (icons) used in reveal */
+const PRESENT_EMOJIS = ["🎁","🧸","🛍️","🕯️","🍬","🧦","🍪"];
+
+/* show animated presents */
+function showPresents(count=5){
+  presentRow.innerHTML = "";
+  for(let i=0;i<count;i++){
+    const sp = document.createElement('span');
+    sp.className = 'present';
+    sp.textContent = PRESENT_EMOJIS[i % PRESENT_EMOJIS.length];
+    presentRow.appendChild(sp);
+    // stagger reveal
+    setTimeout(()=> sp.classList.add('show'), 80 + i*120);
+  }
+}
+
+/* reveal logic */
+drawBtn.addEventListener('click', ()=> {
+  if(!person || !results[person]){
+    alert("Błędny link lub brak przypisanego wyniku.");
+    return;
+  }
+
+  // play bells (may be blocked until user interaction - but we are inside click)
+  try{ bells.currentTime = 0; bells.play(); }catch(e){ /* ignore */ }
+
+  // show presents animation
+  showPresents(6);
+
+  // show result with slight delay to sync with animation
+  setTimeout(()=>{
+    wynikEl.textContent = `Wylosowałeś: ${results[person]} 🎁`;
+    wynikEl.style.display = 'block';
+    wynikEl.style.opacity = 0;
+    wynikEl.animate([{opacity:0, transform:'scale(.98)'},{opacity:1, transform:'scale(1)'}], {duration:700,easing:'cubic-bezier(.2,.9,.3,1)',fill:'forwards'});
+    // small sparkle effect (temporary)
+    const s = document.createElement('div');
+    s.style.position='fixed'; s.style.left='50%'; s.style.top='35%'; s.style.transform='translate(-50%,-50%)';
+    s.style.pointerEvents='none'; s.style.fontSize='36px'; s.textContent='✨';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1100);
+  }, 700);
+
+  // If background music is set and not playing, start it (user opted in via toggle)
+  if(bgMusic.src && !bgMusic.paused && bgMusic.currentTime>0){ /* already playing */ }
+});
+
+/* music toggle */
+musicToggle.addEventListener('click', ()=>{
+  if(!bgMusic.src){
+    // helpful message how to add Cicha Noc
+    alert("Muzyka tła nie została skonfigurowana. Jeśli chcesz, wklej URL do pliku MP3 (instrumental Cicha Noc) w zmiennej bgMusic.src w kodzie strony.");
+    return;
+  }
+  if(bgMusic.paused){
+    bgMusic.volume = 0.18; // subtle
+    bgMusic.play().catch(()=>{ alert('Przeglądarka zablokowała autoplay — kliknij ponownie przycisk muzyki.'); });
+    musicToggle.textContent = '🔊 Muzyka ON';
+    musicToggle.style.background='#fff';
+    musicToggle.style.color='#111';
+  } else {
+    bgMusic.pause();
+    musicToggle.textContent = '🎵 Muzyka';
+    musicToggle.style.background='';
+    musicToggle.style.color='';
+  }
+});
+
+/* accessibility: allow pressing enter on button with keyboard */
+drawBtn.addEventListener('keyup', e=>{ if(e.key==='Enter') drawBtn.click(); });
+
+/* small UX: focus on there's a person */
+if(person && participants.includes(person)) drawBtn.focus();
+
+/* =================
+   extra: responsiveness improvements for mobile
+   ================= */
+(function mobileTweaks(){
+  function apply(){
+    if(window.innerWidth < 520){
+      document.querySelector('.wrap').style.gridTemplateColumns = '1fr';
+      document.getElementById('mikolaj').style.width='100px';
     }
+  }
+  apply();
+  window.addEventListener('resize', apply);
+})();
 
-    // dźwięk 🎶
-    document.getElementById("dzwiek").play();
-
-    // wyświetlenie wyniku
-    const wynikDiv = document.getElementById("wynik");
-    wynikDiv.innerText = "Wylosowałeś: 🎁 " + results[osoba];
-    wynikDiv.style.display = "block";
-    wynikDiv.style.animation = "fadeInResult 1.3s ease";
-};
 </script>
 
 </body>
