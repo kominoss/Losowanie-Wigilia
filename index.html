@@ -3,94 +3,60 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Świąteczne Losowanie — Wigilia 🎁🎄</title>
+<title>Świąteczne Losowanie 🎁🎄</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{--card-bg:rgba(255,255,255,0.95);--accent:#d62828;--green:#0b8a2f}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:"Montserrat",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#111;background:radial-gradient(ellipse at top,rgba(12,30,45,0.9),rgba(2,10,20,0.95)),url('https://images.unsplash.com/photo-1608889175123-5e24e64df0c6?auto=format&fit=crop&w=1600&q=80') center/cover fixed no-repeat;overflow:hidden;padding:28px}
-.wrap{max-width:920px;margin:24px auto;display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
-.panel{background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));padding:22px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.6);backdrop-filter:blur(6px);color:#fff;min-height:280px}
-h1{margin:0 0 8px 0;font-size:28px;color:var(--accent);text-shadow:0 2px 6px rgba(0,0,0,0.6)}
-p.lead{margin:0 0 18px 0;color:#ffd;opacity:.95}
-.card{background:var(--card-bg);color:#111;padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.35);text-align:center}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:"Montserrat",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#111;background:radial-gradient(ellipse at top,rgba(12,30,45,0.9),rgba(2,10,20,0.95)),url('https://images.unsplash.com/photo-1608889175123-5e24e64df0c6?auto=format&fit=crop&w=1600&q=80') center/cover fixed no-repeat;overflow:hidden;padding:20px;display:flex;justify-content:center;align-items:center}
+.wrap{width:100%;max-width:500px;margin:0 auto;display:grid;gap:20px}
+.panel{background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));padding:20px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.6);backdrop-filter:blur(6px);color:#fff;text-align:center}
+h1{margin:0 0 12px 0;font-size:28px;color:var(--accent);text-shadow:0 2px 6px rgba(0,0,0,0.6)}
+p.lead{margin:0 0 18px 0;color:#ffd;opacity:.95;font-size:16px}
+.card{background:var(--card-bg);color:#111;padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.35)}
+button.primary{background:linear-gradient(180deg,var(--accent),#b71c1c);color:white;border:0;padding:16px 24px;border-radius:12px;font-size:20px;cursor:pointer;width:100%;max-width:300px;box-shadow:0 6px rgba(0,0,0,0.2);transition: transform .12s ease, box-shadow .12s ease;margin-top:12px}
+button.primary:active{transform:translateY(2px);box-shadow:0 3px rgba(0,0,0,0.15)}
 #kto{font-size:18px;margin-bottom:12px;color:#333}
 #wynik{font-size:22px;font-weight:700;margin-top:14px;color:var(--green)}
-button.primary{background:linear-gradient(180deg,var(--accent),#b71c1c);color:white;border:0;padding:12px 20px;border-radius:10px;font-size:18px;cursor:pointer;box-shadow:0 6px rgba(0,0,0,0.2);transition: transform .12s ease, box-shadow .12s ease}
-button.primary:active{transform:translateY(2px);box-shadow:0 3px rgba(0,0,0,0.15)}
-button.secondary{margin-left:12px;padding:10px 12px;border-radius:8px;border:0;background:#eee;color:#333;cursor:pointer}
-.sidebar{display:flex;flex-direction:column;gap:14px}
-.box{background:rgba(255,255,255,0.08);padding:14px;border-radius:12px;color:#fff}
-.links input{width:100%;padding:8px;border-radius:8px;border:0}
-.snowflake{position:fixed;top:-10px;pointer-events:none;font-size:18px;color:white;text-shadow:0 1px 2px rgba(0,0,0,0.6)}
-.lights{position:absolute;left:0;right:0;top:0;height:70px;pointer-events:none}
-#mikolaj{position:fixed;bottom:12px;left:-220px;width:140px;z-index:9999;transform:translateY(0);filter:drop-shadow(0 8px 10px rgba(0,0,0,0.6));animation:santaRun 16s linear infinite}
-@keyframes santaRun{
-0%{left:-260px;transform:translateY(0) scaleX(1)}
-40%{left:45%;transform:translateY(-6px) scaleX(1) rotate(-5deg)}
-50%{transform:scaleX(-1) rotate(5deg)}
-90%{left:110%;transform:translateY(0) scaleX(-1)}
-100%{left:110%;transform:translateY(0) scaleX(-1)}
-}
 .present{display:inline-block;margin:6px;opacity:0;transform:translateY(10px) scale(.9)}
 .present.show{animation: pop .6s cubic-bezier(.2,.9,.3,1) forwards}
 @keyframes pop{0%{opacity:0;transform:translateY(10px) scale(.8)}60%{opacity:1;transform:translateY(-8px) scale(1.05)}100%{transform:translateY(0) scale(1)}}
-@media(max-width:880px){.wrap{grid-template-columns:1fr;padding-bottom:180px}#mikolaj{width:100px}}
 .twinkle{position:fixed;z-index:1;pointer-events:none;mix-blend-mode:screen;filter:blur(0.6px);opacity:.9}
-.credit{font-size:12px;color:#ddd;opacity:.8;margin-top:8px;text-align:center}
+@media(max-width:480px){h1{font-size:24px}p.lead{font-size:14px}button.primary{font-size:18px;padding:14px 20px}}
 </style>
 </head>
 <body>
 
 <svg class="twinkle" width="100%" height="120" viewBox="0 0 100 10" preserveAspectRatio="none" style="top:0;left:0">
-<defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ffcc66"/><stop offset="1" stop-color="#ff6b6b"/></linearGradient></defs>
-<g fill="url(#g1)" opacity="0.7">
-<circle cx="5" cy="5" r="0.9"/><circle cx="12" cy="5" r="0.9"/><circle cx="19" cy="5" r="0.9"/>
-<circle cx="26" cy="5" r="0.9"/><circle cx="33" cy="5" r="0.9"/><circle cx="40" cy="5" r="0.9"/>
-<circle cx="47" cy="5" r="0.9"/><circle cx="54" cy="5" r="0.9"/><circle cx="61" cy="5" r="0.9"/>
-<circle cx="68" cy="5" r="0.9"/><circle cx="75" cy="5" r="0.9"/><circle cx="82" cy="5" r="0.9"/>
-<circle cx="89" cy="5" r="0.9"/><circle cx="96" cy="5" r="0.9"/>
-</g>
+  <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ffcc66"/><stop offset="1" stop-color="#ff6b6b"/></linearGradient></defs>
+  <g fill="url(#g1)" opacity="0.7">
+    <circle cx="5" cy="5" r="0.9"/><circle cx="12" cy="5" r="0.9"/><circle cx="19" cy="5" r="0.9"/>
+    <circle cx="26" cy="5" r="0.9"/><circle cx="33" cy="5" r="0.9"/><circle cx="40" cy="5" r="0.9"/>
+    <circle cx="47" cy="5" r="0.9"/><circle cx="54" cy="5" r="0.9"/><circle cx="61" cy="5" r="0.9"/>
+    <circle cx="68" cy="5" r="0.9"/><circle cx="75" cy="5" r="0.9"/><circle cx="82" cy="5" r="0.9"/>
+    <circle cx="89" cy="5" r="0.9"/><circle cx="96" cy="5" r="0.9"/>
+  </g>
 </svg>
-
-<img id="mikolaj" src="https://i.imgur.com/3o6i4kR.png" alt="Mikołaj" />
 
 <div class="wrap">
   <div class="panel">
-    <h1>Świąteczne Losowanie — Wigilia</h1>
-    <p class="lead">Kliknij „Losuj” — wynik ujawni się z animacją i dźwiękiem. Każdy widzi tylko swój wynik.</p>
-
+    <h1>Świąteczne Losowanie</h1>
+    <p class="lead">Kliknij „LOSUJ” aby poznać swojego prezentodawcę 🎁</p>
     <div class="card">
       <div id="kto">Ładowanie…</div>
-      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
-        <button id="drawBtn" class="primary">LOSUJ 🎁</button>
-        <button id="musicToggle" class="secondary" title="Włącz / wyłącz muzykę tła">🎵 Muzyka</button>
-      </div>
+      <button id="drawBtn" class="primary">LOSUJ 🎁</button>
       <div id="wynik" aria-live="polite"></div>
       <div id="presentRow" style="margin-top:16px"></div>
-      <div class="credit">Dźwięk: dzwoneczki • Muzyka tła: opcjonalna (Cicha Noc)</div>
     </div>
   </div>
-
-  <aside class="sidebar">
-    <div class="box">
-      <strong>Instrukcja</strong>
-      <ol style="padding-left:16px;margin:8px 0 0 0;text-align:left;color:#fff">
-        <li>Wyślij każdemu link: <code>?osoba=Imię</code>.</li>
-        <li>Po wejściu kliknij <b>LOSUJ</b> — zobaczysz wynik i animowane prezenty.</li>
-        <li>Możesz włączyć muzykę tła przyciskiem „Muzyka”.</li>
-      </ol>
-    </div>
-  </aside>
 </div>
 
 <audio id="bells" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_f3e5529f65.mp3?filename=christmas-bells-116138.mp3"></audio>
-<audio id="bgMusic" loop preload="none"></audio>
 
 <script>
-// wyniki statyczne
 const results = {
-  "Bożena":"Basia","Jarek":"Danusia","Martyna":"Lena","Basia":"Jarek","Jurek":"Agnieszka","Lena":"Piotrek",
-  "Konrad":"Maciek","Piotrek":"Bożena","Agnieszka":"Jurek","Kuba":"Stasia","Danusia":"Martyna","Maciek":"Konrad","Stasia":"Kuba"
+  "Bożena":"Basia","Jarek":"Danusia","Martyna":"Lena","Basia":"Jarek","Jurek":"Agnieszka",
+  "Lena":"Piotrek","Konrad":"Maciek","Piotrek":"Bożena","Agnieszka":"Jurek",
+  "Kuba":"Stasia","Danusia":"Martyna","Maciek":"Konrad","Stasia":"Kuba"
 };
 const participants = Object.keys(results);
 
@@ -99,10 +65,6 @@ const wynikEl = document.getElementById('wynik');
 const ktoEl = document.getElementById('kto');
 const presentRow = document.getElementById('presentRow');
 const bells = document.getElementById('bells');
-const bgMusic = document.getElementById('bgMusic');
-const musicToggle = document.getElementById('musicToggle');
-
-bgMusic.src = ""; // tu URL MP3 "Cicha Noc", jeśli masz
 
 function getParam(name){return new URLSearchParams(window.location.search).get(name);}
 const person = getParam('osoba');
@@ -118,7 +80,6 @@ function showPresents(count=5){
     const sp=document.createElement('span');
     sp.className='present';
     sp.textContent=PRESENT_EMOJIS[i % PRESENT_EMOJIS.length];
-    sp.style.marginLeft=Math.random()*12+'px';
     presentRow.appendChild(sp);
     setTimeout(()=>sp.classList.add('show'), 80 + i*120);
   }
@@ -128,19 +89,7 @@ drawBtn.addEventListener('click', ()=>{
   if(!person || !results[person]){ alert("Błędny link lub brak przypisanego wyniku."); return; }
   try{ bells.currentTime=0; bells.play(); }catch(e){}
   showPresents(6);
-  setTimeout(()=>{
-    wynikEl.textContent=`Wylosowałeś: ${results[person]} 🎁`;
-    wynikEl.style.display='block';
-    wynikEl.style.opacity=0;
-    wynikEl.animate([{opacity:0, transform:'scale(.98)'},{opacity:1, transform:'scale(1)'}],
-                     {duration:700,easing:'cubic-bezier(.2,.9,.3,1)',fill:'forwards'});
-  },700);
-});
-
-musicToggle.addEventListener('click', ()=>{
-  if(!bgMusic.src){ alert("Muzyka tła nie została skonfigurowana."); return; }
-  if(bgMusic.paused){ bgMusic.volume=0.18; bgMusic.play().catch(()=>alert('Kliknij ponownie, aby odtworzyć muzykę.')); musicToggle.textContent='🔊 Muzyka ON'; musicToggle.style.background='#fff'; musicToggle.style.color='#111'; }
-  else{ bgMusic.pause(); musicToggle.textContent='🎵 Muzyka'; musicToggle.style.background=''; musicToggle.style.color=''; }
+  setTimeout(()=>{ wynikEl.textContent=`Wylosowałeś: ${results[person]} 🎁`; },700);
 });
 </script>
 </body>
