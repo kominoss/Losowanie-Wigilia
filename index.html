@@ -2,58 +2,152 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Losowanie 🎅</title>
+<title>Świąteczne Losowanie 🎅</title>
+
+<!-- STYLE -->
 <style>
     body {
-        font-family: Arial, sans-serif;
-        background: url('https://i.imgur.com/4QF4Q7y.jpeg');
+        font-family: 'Trebuchet MS', sans-serif;
+        background: url('https://images.unsplash.com/photo-1608889175123-5e24e64df0c6?auto=format&fit=crop&w=1500&q=80');
         background-size: cover;
         background-position: center;
         text-align: center;
-        padding-top: 80px;
+        padding-top: 60px;
         color: white;
         text-shadow: 2px 2px 4px #000;
+        overflow: hidden;
+        animation: fadeInBody 2s ease;
     }
+
+    @keyframes fadeInBody {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
     .box {
-        background: rgba(0,0,0,0.6);
-        padding: 25px;
-        width: 350px;
+        background: rgba(0, 0, 0, 0.65);
+        padding: 30px;
+        width: 380px;
         margin: auto;
-        border-radius: 12px;
+        border-radius: 14px;
         backdrop-filter: blur(4px);
+        animation: slideDown 1.7s ease;
     }
+
+    @keyframes slideDown {
+        from { transform: translateY(-40px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
     button {
-        padding: 12px 25px;
-        font-size: 18px;
+        padding: 15px 30px;
+        font-size: 20px;
         border: none;
         background: #d62828;
         color: white;
         cursor: pointer;
-        border-radius: 8px;
-        margin-top: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        font-weight: bold;
+        box-shadow: 0 0 10px #000;
+        animation: pulse 1.6s infinite;
+        transition: 0.3s;
     }
+
     button:hover {
         background: #b71c1c;
+        transform: scale(1.05);
     }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
     #wynik {
-        margin-top: 20px;
-        font-size: 26px;
+        margin-top: 25px;
+        font-size: 30px;
         font-weight: bold;
         display: none;
+        animation: fadeInResult 1s ease;
+    }
+
+    @keyframes fadeInResult {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ❄️ śnieg */
+    .snowflake {
+        position: fixed;
+        top: -10px;
+        color: white;
+        user-select: none;
+        pointer-events: none;
+        animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+        0% { transform: translateY(-10px); }
+        100% { transform: translateY(100vh); }
+    }
+
+    /* 🎅 animowany Mikołaj */
+    #mikolaj {
+        position: fixed;
+        bottom: 20px;
+        left: -200px;
+        width: 140px;
+        animation: runSanta 12s linear infinite;
+        z-index: 999;
+        transform: scaleX(-1);
+    }
+
+    @keyframes runSanta {
+        0% { left: -200px; }
+        50% { left: 110%; transform: scaleX(-1); }
+        51% { transform: scaleX(1); }
+        100% { left: -200px; transform: scaleX(1); }
     }
 </style>
 </head>
 <body>
 
+<!-- ❄️ Śnieg -->
+<script>
+for (let i = 0; i < 60; i++) {
+    let flake = document.createElement("div");
+    flake.className = "snowflake";
+    flake.innerHTML = "❄️";
+    flake.style.left = Math.random() * 100 + "vw";
+    flake.style.animationDuration = 4 + Math.random() * 6 + "s";
+    flake.style.opacity = Math.random();
+    flake.style.fontSize = (12 + Math.random() * 22) + "px";
+    document.body.appendChild(flake);
+}
+</script>
+
+<!-- 🎅 animowany Mikołaj -->
+<img id="mikolaj"
+     src="https://pngimg.com/uploads/santa_claus/santa_claus_PNG99615.png">
+
+<!-- GŁÓWNE OKNO -->
 <div class="box">
     <h1>Świąteczne Losowanie 🎄</h1>
     <h3 id="kto"></h3>
-    <button id="losuj">LOSUJ</button>
+
+    <button id="losuj">LOSUJ 🎁</button>
+
     <div id="wynik"></div>
 </div>
 
+<!-- 🔔 DZWONECZKI -->
+<audio id="dzwiek" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_f3e5529f65.mp3?filename=christmas-bells-116138.mp3"></audio>
+
+<!-- LOGIKA -->
 <script>
-// GOTOWE WYNIKI — 100% poprawne
+// GOTOWE WYNIKI
 const results = {
     "Bożena": "Basia",
     "Jarek": "Danusia",
@@ -64,30 +158,35 @@ const results = {
     "Konrad": "Maciek",
     "Piotrek": "Bożena",
     "Agnieszka": "Jurek",
-    "Kuba": "Konrad",
+    "Kuba": "Stasia",
     "Danusia": "Martyna",
-    "Maciek": "Stasia",
+    "Maciek": "Konrad",
     "Stasia": "Kuba"
 };
 
-// Pobieranie uczestnika z linku
+// pobranie osoby z linku
 const params = new URLSearchParams(window.location.search);
 const osoba = params.get("osoba");
 
-// Wyświetlanie osobie jej imienia
 document.getElementById("kto").innerText =
-    osoba ? ("Witaj, " + osoba + "! Kliknij aby wylosować.") :
+    osoba ? ("Witaj, " + osoba + "! Kliknij aby poznać swojego 🎁.") :
     "BŁĄD: brak uczestnika w linku.";
 
-// Obsługa przycisku LOSUJ
+// po kliknięciu
 document.getElementById("losuj").onclick = function() {
     if (!osoba || !results[osoba]) {
         alert("Błędny link lub brak przypisanego wyniku.");
         return;
     }
-    document.getElementById("wynik").innerText =
-        "Wylosowałeś: 🎁 " + results[osoba];
-    document.getElementById("wynik").style.display = "block";
+
+    // dźwięk 🎶
+    document.getElementById("dzwiek").play();
+
+    // wyświetlenie wyniku
+    const wynikDiv = document.getElementById("wynik");
+    wynikDiv.innerText = "Wylosowałeś: 🎁 " + results[osoba];
+    wynikDiv.style.display = "block";
+    wynikDiv.style.animation = "fadeInResult 1.3s ease";
 };
 </script>
 
